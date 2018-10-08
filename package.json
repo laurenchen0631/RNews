@@ -1,12 +1,13 @@
 {
-  "name": "RNews",
+  "name": "rnews",
   "version": "0.0.1",
   "private": true,
   "scripts": {
     "start": "node node_modules/react-native/local-cli/cli.js start",
     "test": "jest",
     "ios": "node node_modules/react-native/local-cli/cli.js run-ios",
-    "android": "node node_modules/react-native/local-cli/cli.js run-android"
+    "android": "node node_modules/react-native/local-cli/cli.js run-android",
+    "tsc:watch": "tsc --noEmit --watch"
   },
   "dependencies": {
     "react": "16.5.0",
