@@ -1,0 +1,3 @@
+rootProject.name = 'RNews'
+
+include ':app'
