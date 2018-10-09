@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react';
-import { View, Text, Dimensions, Image, ScrollView, Button, Modal, WebView, TouchableOpacity } from 'react-native';
+import { View, Text, Dimensions, Image, ScrollView, Button, Modal, WebView, TouchableOpacity, StyleSheet } from 'react-native';
 import { NavigationScreenProps, SafeAreaView } from 'react-navigation';
 import { Article } from '../api/news';
 import { getTimeDiffOfLocaleString } from '../utils/time';
@@ -42,7 +42,7 @@ export default class ArticlePage extends PureComponent<PropTypes, State> {
 
         const { imageRatioByWidth } = this.state;
         return (
-            <ScrollView style={{ backgroundColor: '#FFF', flex: 1 }}>
+            <ScrollView style={styles.container}>
                 {
                     article.urlToImage &&
                     typeof imageRatioByWidth === 'number' &&
@@ -51,25 +51,25 @@ export default class ArticlePage extends PureComponent<PropTypes, State> {
                         style={{ width: deviceWidth, height: imageRatioByWidth ? imageRatioByWidth * deviceWidth : 200 }}
                     />
                 }
-                <View style={{ padding: 10 }}>
-                    <Text style={{ fontSize: 17, fontWeight: 'bold', color: '#000', lineHeight: 24 }}>
+                <View style={styles.contentWrapper}>
+                    <Text style={styles.titleText}>
                         {article.title}
                     </Text>
 
-                    <View style={{ flexDirection: 'row', flexWrap: 'nowrap', justifyContent: 'space-between', marginTop: 10, marginBottom: 20 }}>
-                        <View style={{ flexDirection: 'row' }}>
-                            <Text style={{ color: '#616161', fontSize: 12, marginRight: 10 }}>
+                    <View style={styles.infoRow}>
+                        <View style={styles.authorBlock}>
+                            <Text style={styles.sourceText}>
                                 {article.source.name && article.source.name.split('.')[0]}
                             </Text>
-                            <Text style={{ color: '#000', fontSize: 12 }}>
+                            <Text style={styles.authorText}>
                                 {article.author && article.author.split('/').splice(-1)}
                             </Text>
                         </View>
 
-                        <Text style={{ color: '#616161', fontSize: 12 }}>{getTimeDiffOfLocaleString(article.publishedAt)}</Text>
+                        <Text style={styles.timeText}>{getTimeDiffOfLocaleString(article.publishedAt)}</Text>
                     </View>
 
-                    <Text style={{ color: '#000', fontSize: 14, lineHeight: 18 }}>
+                    <Text style={styles.contentText}>
                         {article.content && article.content.replace(/\[.+\]/g, '')}
                     </Text>
                 </View>
@@ -93,7 +93,7 @@ export default class ArticlePage extends PureComponent<PropTypes, State> {
             >
                 <SafeAreaView>
                     <TouchableOpacity onPress={this.closeFullArticle}>
-                        <Text style={{ fontSize: 17, color: '#007AFF', marginLeft: 10, marginVertical: 12 }}>關閉</Text>
+                        <Text style={styles.headerTintText}>關閉</Text>
                     </TouchableOpacity>
                 </SafeAreaView>
                 <WebView
@@ -115,3 +115,53 @@ export default class ArticlePage extends PureComponent<PropTypes, State> {
         this.setState({ showMore: false });
     }
 }
+
+const styles = StyleSheet.create({
+    container: {
+        backgroundColor: '#FFF',
+        flex: 1,
+    },
+    contentWrapper: {
+        padding: 10,
+    },
+    titleText: {
+        fontSize: 17,
+        fontWeight: 'bold',
+        color: '#000',
+        lineHeight: 24,
+    },
+    infoRow: {
+        flexDirection: 'row',
+        flexWrap: 'nowrap',
+        justifyContent: 'space-between',
+        marginTop: 10,
+        marginBottom: 20,
+    },
+    authorBlock: {
+        flexDirection: 'row',
+    },
+    sourceText: {
+        color: '#616161',
+        fontSize: 12,
+        marginRight: 10,
+    },
+    authorText: {
+        color: '#000',
+        fontSize: 12,
+    },
+    timeText: {
+        color: '#616161',
+        fontSize: 12,
+    },
+    contentText: {
+        color: '#000',
+        fontSize: 14,
+        lineHeight: 18,
+    },
+    headerTintText: {
+        fontSize: 17,
+        color: '#007AFF',
+        marginLeft: 10,
+        marginVertical: 12,
+    },
+});

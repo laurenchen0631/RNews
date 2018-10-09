@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react';
-import { View, FlatList, ListRenderItem, ActivityIndicator, Image } from 'react-native';
+import { View, FlatList, ListRenderItem, ActivityIndicator, Image, StyleSheet } from 'react-native';
 import { createMaterialTopTabNavigator, NavigationComponent, NavigationScreenProps } from 'react-navigation';
 import ArticleCard from './ArticleCard';
 import { NewsCategory, fetchTopHeadlines, Article } from '../api/news';
@@ -8,7 +8,6 @@ type PropTypes = NavigationScreenProps;
 interface State {
     articles: Article[] | null;
     refreshing: boolean;
-    // focus: boolean;
 }
 
 class TopHeadlines extends PureComponent<PropTypes, State> {
@@ -21,12 +20,6 @@ class TopHeadlines extends PureComponent<PropTypes, State> {
         this.fetchTopHeadlines();
     }
 
-    // public componentDidUpdate(prevProps: PropTypes) {
-    //     if (this.getCategory(prevProps) !== this.getCategory(this.props)) {
-    //         this.fetchTopHeadlines();
-    //     }
-    // }
-
     public render() {
         return (
             <>
@@ -36,13 +29,13 @@ class TopHeadlines extends PureComponent<PropTypes, State> {
                             data={this.state.articles}
                             renderItem={this.renderArticle}
                             keyExtractor={this.keyExtractor}
-                            contentContainerStyle={{ paddingBottom: 40 }}
+                            contentContainerStyle={styles.flatListContentContainer}
                             refreshing={this.state.refreshing}
                             onRefresh={this.fetchTopHeadlines}
                         />
                     )
                     : (
-                        <View style={{ marginTop: 100 }}>
+                        <View style={styles.initizeLoader}>
                             <ActivityIndicator
                                 size="large"
                             />
@@ -92,51 +85,54 @@ class TopHeadlines extends PureComponent<PropTypes, State> {
     }
 }
 
+const styles = StyleSheet.create({
+    tabStyle: {
+        paddingVertical: 6,
+        width: 80,
+    },
+    indicatorStyle: {
+        backgroundColor: '#007AFF',
+        width: 50,
+        marginLeft: 15,
+    },
+    labelStyle: {
+        fontSize: 14,
+    },
+    tabContainerStyle: {
+        backgroundColor: 'white',
+    },
+    flatListContentContainer: {
+        paddingBottom: 40,
+    },
+    initizeLoader: {
+        marginTop: 100,
+    },
+});
+
+const categories: NewsCategory[] = ['general', 'business', 'entertainment', 'science', 'technology', 'health', 'sports'];
+const categoryName: { [category in NewsCategory]: string } = {
+    general: '最新',
+    business: '商業',
+    science: '科學',
+    technology: '科技',
+    entertainment: '娛樂',
+    health: '健康',
+    sports: '體育',
+};
+
 const TopHeadlinesTab = createMaterialTopTabNavigator(
-    {
-        general: {
-            screen: TopHeadlines,
-            navigationOptions: {
-                title: '最新',
-            },
+    categories.reduce<{ [category: string]: NavigationComponent }>(
+        (route, category) => {
+            route[category] = {
+                screen: TopHeadlines,
+                navigationOptions: {
+                    title: categoryName[category],
+                },
+            };
+            return route;
         },
-        business: {
-            screen: TopHeadlines,
-            navigationOptions: {
-                title: '商業',
-            },
-        },
-        science: {
-            screen: TopHeadlines,
-            navigationOptions: {
-                title: '科學',
-            },
-        },
-        technology: {
-            screen: TopHeadlines,
-            navigationOptions: {
-                title: '科技',
-            },
-        },
-        entertainment: {
-            screen: TopHeadlines,
-            navigationOptions: {
-                title: '娛樂',
-            },
-        },
-        health: {
-            screen: TopHeadlines,
-            navigationOptions: {
-                title: '健康',
-            },
-        },
-        sports: {
-            screen: TopHeadlines,
-            navigationOptions: {
-                title: '體育',
-            },
-        },
-    } as { [category in NewsCategory]: NavigationComponent },
+        {},
+    ),
     {
         swipeEnabled: true,
         optimizationsEnabled: true,
@@ -145,21 +141,10 @@ const TopHeadlinesTab = createMaterialTopTabNavigator(
             scrollEnabled: true,
             activeTintColor: '#007AFF',
             inactiveTintColor: '#000',
-            tabStyle: {
-                paddingVertical: 6,
-                width: 80,
-            },
-            indicatorStyle: {
-                backgroundColor: '#007AFF',
-                width: 50,
-                marginLeft: 15,
-            },
-            labelStyle: {
-                fontSize: 14,
-            },
-            style: {
-                backgroundColor: 'white',
-            },
+            tabStyle: styles.tabStyle,
+            indicatorStyle: styles.indicatorStyle,
+            labelStyle: styles.labelStyle,
+            style: styles.tabContainerStyle,
         },
     } as any,
 );
