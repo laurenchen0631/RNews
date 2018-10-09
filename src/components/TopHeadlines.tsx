@@ -7,24 +7,25 @@ import { NewsCategory, fetchTopHeadlines, Article } from '../api/news';
 type PropTypes = NavigationScreenProps;
 interface State {
     articles: Article[] | null;
+    refreshing: boolean;
     // focus: boolean;
 }
 
 class TopHeadlines extends PureComponent<PropTypes, State> {
     public state: State = {
         articles: null,
-        // focus: false,
+        refreshing: false,
     };
 
     public componentDidMount() {
         this.fetchTopHeadlines();
     }
 
-    public componentDidUpdate(prevProps: PropTypes) {
-        if (this.getCategory(prevProps) !== this.getCategory(this.props)) {
-            this.fetchTopHeadlines();
-        }
-    }
+    // public componentDidUpdate(prevProps: PropTypes) {
+    //     if (this.getCategory(prevProps) !== this.getCategory(this.props)) {
+    //         this.fetchTopHeadlines();
+    //     }
+    // }
 
     public render() {
         return (
@@ -36,6 +37,8 @@ class TopHeadlines extends PureComponent<PropTypes, State> {
                             renderItem={this.renderArticle}
                             keyExtractor={this.keyExtractor}
                             contentContainerStyle={{ paddingBottom: 40 }}
+                            refreshing={this.state.refreshing}
+                            onRefresh={this.fetchTopHeadlines}
                         />
                     )
                     : (
@@ -70,21 +73,22 @@ class TopHeadlines extends PureComponent<PropTypes, State> {
         );
     }
 
-    private getCategory(props: PropTypes): NewsCategory {
-        return props.navigation.state.routeName as NewsCategory;
-    }
-
-    private fetchTopHeadlines() {
-        const category = this.props.navigation!.state.routeName as NewsCategory;
+    private fetchTopHeadlines = () => {
+        const category = this.getCategory(this.props);
+        this.setState({ refreshing: true });
         fetchTopHeadlines(category)
             .then(({ articles }) => {
-                this.setState({ articles });
+                this.setState({ articles, refreshing: false });
                 articles
                     .filter(article => Boolean(article.urlToImage))
                     .forEach((article) => {
                         Image.prefetch(article.urlToImage!);
                     });
             });
+    }
+
+    private getCategory(props: PropTypes): NewsCategory {
+        return props.navigation.state.routeName as NewsCategory;
     }
 }
 
