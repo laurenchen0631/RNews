@@ -1,29 +1,27 @@
 import React, { PureComponent } from 'react';
-import { View, Text } from 'react-native';
-import { createMaterialTopTabNavigator, NavigationComponent, NavigationScreenProps, NavigationNavigateActionPayload } from 'react-navigation';
+import { View, FlatList, ListRenderItem, ActivityIndicator, Image } from 'react-native';
+import { createMaterialTopTabNavigator, NavigationComponent, NavigationScreenProps } from 'react-navigation';
+import ArticleCard from './ArticleCard';
 import { NewsCategory, fetchTopHeadlines, Article } from '../api/news';
 
 type PropTypes = NavigationScreenProps;
-type State = { articles: Article[] | null, focus: boolean }
+interface State {
+    articles: Article[] | null;
+    // focus: boolean;
+}
 
 class TopHeadlines extends PureComponent<PropTypes, State> {
+    public static navigationOptions = {
+        title: '頭條新聞',
+    };
+
     public state: State = {
         articles: null,
-        focus: false,
-    }
-
-    static navigationOptions = {
-        title: '頭條新聞',
+        // focus: false,
     };
 
     public componentDidMount() {
         this.fetchTopHeadlines();
-        // this.props.navigation.addListener(
-        //     'willFocus',
-        //     () => {
-        //         console.log('willFocus', this.getCategory(this.props))
-        //     }
-        // )
     }
 
     public componentDidUpdate(prevProps: PropTypes) {
@@ -34,19 +32,41 @@ class TopHeadlines extends PureComponent<PropTypes, State> {
 
     public render() {
         return (
-            <View>
-                <Text>TopHeadlines</Text>
-                <Text>TopHeadlines</Text>
-                <Text>TopHeadlines</Text>
-                <Text>TopHeadlines</Text>
-                <Text>TopHeadlines</Text>
-                <Text>TopHeadlines</Text>
-                <Text>TopHeadlines</Text>
-                <Text>TopHeadlines</Text>
-                <Text>TopHeadlines</Text>
-                <Text>TopHeadlines</Text>
-            </View>
-        )
+            <>
+                {
+                    this.state.articles ? (
+                        <FlatList
+                            data={this.state.articles}
+                            renderItem={this.renderArticle}
+                            keyExtractor={this.keyExtractor}
+                            contentContainerStyle={{ paddingBottom: 40 }}
+                        />
+                    )
+                    : (
+                        <View style={{ marginTop: 100 }}>
+                            <ActivityIndicator
+                                size="large"
+                            />
+                        </View>
+                    )
+                }
+            </>
+        );
+    }
+
+    private keyExtractor = (item: Article) => item.title;
+
+    private renderArticle: ListRenderItem<Article> = ({ item }) => {
+        return (
+            <ArticleCard
+                article={item}
+                onPress={this.navigateToArticle}
+            />
+        );
+    }
+
+    private navigateToArticle = (article: Article) => {
+        console.log(article);
     }
 
     private getCategory(props: PropTypes): NewsCategory {
@@ -57,13 +77,20 @@ class TopHeadlines extends PureComponent<PropTypes, State> {
         const category = this.props.navigation!.state.routeName as NewsCategory;
         fetchTopHeadlines(category)
             .then((res) => {
-                this.setState({
-                    articles: res.articles.filter(article => Boolean(article.urlToImage)),
-                })
-                console.log(res)
+                const articles = res.articles.filter(article => Boolean(article.urlToImage));
+                this.setState({ articles });
+                articles.forEach((article) => {
+                    try {
+                        Image.prefetch(article.urlToImage!);
+                    }
+                    catch (error) {
+                        console.warn(error);
+                    }
+                });
             });
     }
 }
+
 const TopHeadlinesTab = createMaterialTopTabNavigator(
     {
         general: {
@@ -114,7 +141,7 @@ const TopHeadlinesTab = createMaterialTopTabNavigator(
         optimizationsEnabled: true,
         lazy: true,
         tabBarOptions: {
-            scrollEnabled: false,
+            scrollEnabled: true,
             activeTintColor: '#007AFF',
             inactiveTintColor: '#000',
             tabStyle: {
@@ -131,10 +158,10 @@ const TopHeadlinesTab = createMaterialTopTabNavigator(
             },
             style: {
                 backgroundColor: 'white',
-            }
-        }
-    }
-)
+            },
+        },
+    } as any,
+);
 
 TopHeadlinesTab.navigationOptions = {
     title: '頭條新聞',
