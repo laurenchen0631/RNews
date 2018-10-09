@@ -11,10 +11,6 @@ interface State {
 }
 
 class TopHeadlines extends PureComponent<PropTypes, State> {
-    public static navigationOptions = {
-        title: '頭條新聞',
-    };
-
     public state: State = {
         articles: null,
         // focus: false,
@@ -66,7 +62,12 @@ class TopHeadlines extends PureComponent<PropTypes, State> {
     }
 
     private navigateToArticle = (article: Article) => {
-        console.log(article);
+        this.props.navigation.navigate(
+            'Article',
+            {
+                article,
+            },
+        );
     }
 
     private getCategory(props: PropTypes): NewsCategory {
@@ -76,17 +77,13 @@ class TopHeadlines extends PureComponent<PropTypes, State> {
     private fetchTopHeadlines() {
         const category = this.props.navigation!.state.routeName as NewsCategory;
         fetchTopHeadlines(category)
-            .then((res) => {
-                const articles = res.articles.filter(article => Boolean(article.urlToImage));
+            .then(({ articles }) => {
                 this.setState({ articles });
-                articles.forEach((article) => {
-                    try {
+                articles
+                    .filter(article => Boolean(article.urlToImage))
+                    .forEach((article) => {
                         Image.prefetch(article.urlToImage!);
-                    }
-                    catch (error) {
-                        console.warn(error);
-                    }
-                });
+                    });
             });
     }
 }

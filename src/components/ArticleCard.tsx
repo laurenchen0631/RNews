@@ -17,18 +17,21 @@ export default class ArticleCard extends PureComponent<PropTypes> {
                 onPress={this.handleOnPress}
             >
                 <View style={{ backgroundColor: 'white', marginTop: 15 }}>
-                    <Image
-                        style={{ width: deviceWidth, height: 200 }}
-                        source={{ uri: this.props.article.urlToImage! }}
-                        resizeMode="cover"
-                        resizeMethod="scale"
-                    />
+                    {
+                        this.props.article.urlToImage &&
+                        <Image
+                            style={{ width: deviceWidth, height: 200 }}
+                            source={{ uri: this.props.article.urlToImage! }}
+                            resizeMode="cover"
+                            resizeMethod="scale"
+                        />
+                    }
                     <View style={{ padding: 10  }}>
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 5 }}>
                             <Text style={{ color: '#000035', fontSize: 14, fontWeight: 'bold' }}>{this.props.article.source.name.split('.')[0]}</Text>
                             <Text style={{ color: '#616161', fontSize: 12 }}>{getTimeDiffOfLocaleString(this.props.article.publishedAt)}</Text>
                         </View>
-                        <Text style={{ fontSize: 17, fontWeight: 'bold', color: '#000' }}>
+                        <Text style={{ fontSize: 17, fontWeight: 'bold', color: '#000', lineHeight: 24 }}>
                             {this.props.article.title}
                         </Text>
                     </View>
